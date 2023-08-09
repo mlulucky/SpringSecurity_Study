@@ -1,26 +1,22 @@
 package com.example.todolist_backend.controller;
 
-import com.example.todolist_backend.dto.UserRequest;
-import com.example.todolist_backend.service.UserService;
-import lombok.RequiredArgsConstructor;
+import com.example.todolist_backend.dto.todo.ToDoCreateRequest;
+import com.example.todolist_backend.dto.todo.ToDoCreateResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-// @RequiredArgsConstructor // 자동으로 생성자 주입
 @RequestMapping("/api/user")
 public class UserController {
+//    @GetMapping("/login")
+//    public ResponseEntity<String> login(){
+//        return ResponseEntity.ok("login");
+//    }
 
-    private final UserService userService;
+//    @PostMapping("/{id}/todos")
+//    public ResponseEntity<ToDoCreateResponse> add(@RequestBody ToDoCreateRequest toDoCreateRequest) { // 요청본문으로 들어온 json 을 객체로 맵핑
+//
+//    }
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-    @PostMapping("/join")
-    public ResponseEntity<String> join(@RequestBody UserRequest dto) {
-        return ResponseEntity.ok().body("회원가입 성공");
-    }
+
 }

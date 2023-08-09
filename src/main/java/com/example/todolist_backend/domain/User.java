@@ -12,12 +12,12 @@ import java.util.Collection;
 import java.util.List;
 
 
-// @Table(name = "users")
+//@Table(name = "users")
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // 파라미터가 없는 생성자를 자동 생성
 @AllArgsConstructor // 파라미터가 있는 생성자를 자동 생성
 @Getter
-@Entity
+@Entity // 해당 클래스를 테이블로 인식할 수 있도록 만드는 어노테이션
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,19 +25,19 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String account;
-
     @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
     private String email;
+    @Column(nullable = false)
     private String password;
 
     @CreationTimestamp
     private LocalDateTime createAt;
 
-    public static User user(User user){
-
-        return User.build();
-    }
+    // 유저 입장에서는 유저는 1 todo 는 여러개
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY) // getToDo 를 할때 조인방식
+    private List<ToDo> todos;
 
 }
 // public class User implements UserDetails { // UserDetails : 스프링 시큐리티 _ 사용자 인증정보를 담아두는 인터페이스
