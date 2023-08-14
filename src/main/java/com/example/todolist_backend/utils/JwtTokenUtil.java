@@ -10,9 +10,9 @@ import java.util.Date;
 // 보안, 문자열처리, 날짜 처리 등 특정 비즈니스 로직과 독립적인 기능
 // 토큰을 만들어내는 것 자체는 비즈니스 로직과 관련이 없기 때문에 util 패키지에 들어가는 것
 // 특정 개념과 독립적인 기능 + 다른 부분과 의존성이 없고 input parameter 만 갖고 단순한 처리만 하는 메소드들은 특히 정적(static) 메소드로 많이 구성
-public class JwtTokenUtil {
+public class JwtTokenUtil { // 🌈 userService 에서 로그인시 jwt 토큰 발행에 사용
     public static String createToken(String account, String key, long expireTimeMs) {
-        Claims claims = Jwts.claims();
+        Claims claims = Jwts.claims(); // 정보를 담는 // 일종의 map
         claims.put("account", account);
 
         return Jwts.builder()
