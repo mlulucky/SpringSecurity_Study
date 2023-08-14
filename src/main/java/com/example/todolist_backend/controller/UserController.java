@@ -41,7 +41,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody UserLoginRequest dto) {
-        String token = userService.login(dto.getAccount(), dto.getPassword());
+        String token = userService.login(dto.getAccount(), dto.getPassword()); // 로그인시 토큰발행 (-> 유효한 토큰인지 확인 -> 인증, 인가 기능)
         return ResponseEntity.ok().body(token); // ResponseEntity 클래스 : HTTP 응답을 생성하는 코드, 성공적인 상태일 때 200 OK 상태 코드와 함께 응답 본문(body)에 token 값을 담아서 클라이언트에게 반환하겠다
     }
 }
