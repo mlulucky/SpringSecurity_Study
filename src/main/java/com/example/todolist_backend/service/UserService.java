@@ -40,4 +40,20 @@ public class UserService {
 
         return "SUCCESS";
     }
+
+    public String login(String account, String password) {
+        // 로그인 실패1 - userName 없음
+        User selectedUser = userRepository.findByAccount(account)
+                .orElseThrow(()-> new AppException(ErrorCode.USERNAME_NOT_FOUND, account + "이 없습니다."));
+        // 로그인 실패2 - password 없음
+        // 인코딩 문자열을 비교하는 법(인코딩할때마다 매번 결과 달라짐) -> BCryptPasswordEncoder 클래스의 matches 메서드
+        if(!encoder.matches(selectedUser.getPassword(), password)) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "패스워드를 잘못 입력했습니다.");
+        }
+        // 앞에서 Exception 에러 안났으면 토큰 발행
+
+
+        // 로그인 성공 - token 리턴
+        return "token 리턴";
+    }
 }
