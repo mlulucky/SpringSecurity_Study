@@ -2,6 +2,7 @@ package com.example.todolist_backend.service;
 
 import com.example.todolist_backend.domain.User;
 import com.example.todolist_backend.dto.user.UserJoinRequest;
+import com.example.todolist_backend.dto.user.UserLoginResponse;
 import com.example.todolist_backend.exception.AppException;
 import com.example.todolist_backend.exception.ErrorCode;
 import com.example.todolist_backend.repository.UserRepository;
@@ -22,6 +23,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
+
 
     @Value("${jwt.token.secret}") // application 환경변수로 지정
     private String key; // jwt 토큰생성 키
@@ -65,6 +67,9 @@ public class UserService {
 
         // 앞에서 Exception 에러 안났으면 토큰 발행
         String token = JwtTokenUtil.createToken(selectedUser.getAccount(), key, expireTimeMs);
+
+        int experTime = 1000 * 60 * 60;
+        // UserLoginResponse userLoginResponse = new UserLoginResponse(token, experTime, user);
 
         // 로그인 성공 - token 리턴
         return token;
