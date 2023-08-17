@@ -1,5 +1,6 @@
 package com.example.todolist_backend.domain;
 
+import com.example.todolist_backend.dto.user.UserJoinRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,7 +15,7 @@ import java.util.List;
 @Entity // 해당 클래스를 테이블로 인식할 수 있도록 만드는 어노테이션
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본키를 자동으로 생성해주는 어노테이션
     private Long id;
 
     @Column(nullable = false, unique = true)
@@ -35,5 +36,13 @@ public class User {
     // 유저 입장에서는 유저는 1 todo 는 여러개
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY) // getToDo 를 할때 조인방식
     private List<ToDo> todos;
+
+    public User(UserJoinRequest dto) {
+        this.account = dto.getAccount();
+        this.userName = dto.getUserName();
+        this.email = dto.getEmail();
+        this.password = dto.getPassword();
+
+    }
 
 }
