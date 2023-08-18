@@ -1,5 +1,6 @@
 package com.example.todolist_backend.dto.user;
 
+import com.example.todolist_backend.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,4 +11,5 @@ import lombok.NoArgsConstructor;
 public class UserLoginResponseDto { // 유저 로그인 시 서버에서 응답하는 DTO
     private String token;
     private int experTime;
+    private User user;
 }
