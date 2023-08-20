@@ -6,14 +6,17 @@ import com.example.todolist_backend.dto.user.ResponseDto;
 import com.example.todolist_backend.dto.user.UserJoinRequest;
 import com.example.todolist_backend.dto.user.UserLoginResponseDto;
 import com.example.todolist_backend.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final TokenProvider tokenProvider;
+
 
     public ResponseDto<?> join(UserJoinRequest dto) {
         String account = dto.getAccount();
@@ -51,7 +54,7 @@ public class AuthService {
         String password = dto.getPassword();
 
         try {
-            boolean isExistUser = userRepository.existsByAccountAndPassword(account, password);
+            boolean isExistUser = userRepository.existsByAccountAndPassword(account, password); // 🌈 아이디, 비밀번호 유효성 따로 체크 고려
             if(!isExistUser) return ResponseDto.setFailed("로그인 정보가 맞지 않습니다.");
         } catch (Exception error) {
             return ResponseDto.setFailed("데이터베이스 에러");
@@ -65,7 +68,9 @@ public class AuthService {
             return ResponseDto.setFailed("데이터베이스 에러");
         }
 
-        String token = ""; // ?
+        // 유저 비밀번호를 "" 으로 한다??
+
+        String token = tokenProvider.create(account); // ?
         int experTime = 1000 * 60 * 60;
 
         UserLoginResponseDto userLoginResponseDto = new UserLoginResponseDto(token, experTime, user);
