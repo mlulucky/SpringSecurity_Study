@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // 파라미터가 없는 기본 생성자를 자동 생성
 @AllArgsConstructor // 모든 필드를 인자로 받는 생성자를 자동으로 생성
 @Getter
+@Setter
 @Entity // 해당 클래스를 테이블로 인식할 수 있도록 만드는 어노테이션
 public class User {
     @Id
@@ -37,12 +38,11 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY) // getToDo 를 할때 조인방식
     private List<ToDo> todos;
 
-    public User(UserJoinRequest dto) {
-        this.account = dto.getAccount();
-        this.userName = dto.getUserName();
-        this.email = dto.getEmail();
-        this.password = dto.getPassword();
-
-    }
+//    public User(UserJoinRequest dto) {
+//        this.account = dto.getAccount();
+//        this.userName = dto.getUserName();
+//        this.email = dto.getEmail();
+//        this.password = dto.getPassword();
+//    }
 
 }
