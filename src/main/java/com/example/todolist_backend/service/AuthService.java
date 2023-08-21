@@ -8,6 +8,8 @@ import com.example.todolist_backend.dto.user.UserLoginResponseDto;
 import com.example.todolist_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,6 +18,8 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
+
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
     public ResponseDto<?> join(UserJoinRequest dto) {
@@ -35,8 +39,17 @@ public class AuthService {
         if(!password.equals(passwordCheck))
             return ResponseDto.setFailed("비밀번호가 맞지 않습니다.");
 
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(password);
         // 유저 생성
-        User user = new User(dto);
+         // User user = new User(dto);
+         // user.setPassword(encodedPassword);
+         User user = User.builder()
+                 .account(account)
+                 .userName(dto.getUserName())
+                 .email(dto.getEmail())
+                 .password(encodedPassword)
+                 .build();
 
         // userRepository 이용해서 데이터베이스에 유저 저장
         try{
@@ -44,7 +57,6 @@ public class AuthService {
         } catch (Exception error) {
             return ResponseDto.setFailed("데이터베이스 에러");
         }
-
         // 성공시 success response 반환
         return ResponseDto.setSuccess("회원가입 성공", null);
     }
@@ -53,24 +65,21 @@ public class AuthService {
         String account = dto.getAccount(); // 🌈 spring validate 설정 추가하기??
         String password = dto.getPassword();
 
-        try {
-            boolean isExistUser = userRepository.existsByAccountAndPassword(account, password); // 🌈 아이디, 비밀번호 유효성 따로 체크 고려
-            if(!isExistUser) return ResponseDto.setFailed("로그인 정보가 맞지 않습니다.");
-        } catch (Exception error) {
-            return ResponseDto.setFailed("데이터베이스 에러");
-        }
-
         User user = null;
-
         try {
-            user = userRepository.findByAccount(account).get();
+            user = userRepository.findByAccount(account);
+            // 잘못된 계정
+            if(user == null) return ResponseDto.setFailed("로그인 실패 _ 잘못된 계정");
+            // 잘못된 패스워드
+            if(!passwordEncoder.matches(password, user.getPassword())) // passwordEncoder.matches : matches 는 암호화된 문자열을 DB 등에 저장된 값과 비교할 때 사용
+                return ResponseDto.setFailed("로그인 실패 _ 잘못된 패스워드");
         } catch (Exception error) {
             return ResponseDto.setFailed("데이터베이스 에러");
         }
 
-        // 유저 비밀번호를 "" 으로 한다??
+        user.setPassword("");  // 유저 비밀번호를 "" 으로 한다 -> 로그인 응답 데이터에서 비밀번호 안보이게 하기
 
-        String token = tokenProvider.create(account); // ?
+        String token = tokenProvider.create(account);
         int experTime = 1000 * 60 * 60;
 
         UserLoginResponseDto userLoginResponseDto = new UserLoginResponseDto(token, experTime, user);
