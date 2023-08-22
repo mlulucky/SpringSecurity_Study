@@ -1,4 +1,4 @@
-package com.example.todolist_backend.dto.user;
+package com.example.todolist_backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -2,12 +2,11 @@ package com.example.todolist_backend.service;
 
 import com.example.todolist_backend.domain.User;
 import com.example.todolist_backend.dto.UserLoginRequest;
-import com.example.todolist_backend.dto.user.ResponseDto;
+import com.example.todolist_backend.dto.ResponseDto;
 import com.example.todolist_backend.dto.user.UserJoinRequest;
-import com.example.todolist_backend.dto.user.UserLoginResponseDto;
+import com.example.todolist_backend.dto.user.UserLoginResponse;
 import com.example.todolist_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -61,7 +60,7 @@ public class AuthService {
         return ResponseDto.setSuccess("회원가입 성공", null);
     }
 
-    public ResponseDto<UserLoginResponseDto> login(UserLoginRequest dto) {
+    public ResponseDto<UserLoginResponse> login(UserLoginRequest dto) {
         String account = dto.getAccount(); // 🌈 spring validate 설정 추가하기??
         String password = dto.getPassword();
 
@@ -82,7 +81,7 @@ public class AuthService {
         String token = tokenProvider.create(account);
         int experTime = 1000 * 60 * 60;
 
-        UserLoginResponseDto userLoginResponseDto = new UserLoginResponseDto(token, experTime, user);
+        UserLoginResponse userLoginResponseDto = new UserLoginResponse(token, experTime, user);
         return ResponseDto.setSuccess("로그인 성공했습니다.", userLoginResponseDto);
 
 
