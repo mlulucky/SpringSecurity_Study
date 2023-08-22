@@ -20,9 +20,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity // 모든 api 에 spring security 인증이 필요하다고 설정 // Spring Security 설정 활성화 // Spring Security 의 기능을 사용하려는 클래스에 적용
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final UserService userService;
-
     @Value("${jwt.token.secret}")
     private String secretKey;
 
