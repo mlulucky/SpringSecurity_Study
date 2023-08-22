@@ -2,12 +2,14 @@ package com.example.todolist_backend.service;
 
 import com.example.todolist_backend.domain.ToDo;
 import com.example.todolist_backend.domain.User;
+import com.example.todolist_backend.dto.UserLoginRequest;
 import com.example.todolist_backend.dto.todo.ToDoCreateRequest;
 import com.example.todolist_backend.dto.todo.ToDoCreateResponse;
 import com.example.todolist_backend.repository.ToDoRepository;
 import com.example.todolist_backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,7 +32,7 @@ public class ToDoService {
         ToDo todo = ToDo.builder()
                 .content(dto.getContent())
                 .done(dto.isDone())
-                .user(userOptional.get())
+                .user(userOptional.get()) // 투두 작성한 유저
                 .build();
 
         // db 저장 -> todo 를 리턴해줌
@@ -43,4 +45,12 @@ public class ToDoService {
                 .message("투두 등록이 성공했습니다.")
                 .build();
     }
+
+    // todo 리스트
+    public List<ToDo> list(Long uId) {
+        List<ToDo> list = toDoRepository.findByUser_Id(uId);
+        return list;
+    }
+
+
 }
