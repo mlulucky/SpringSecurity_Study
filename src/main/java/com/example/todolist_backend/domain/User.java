@@ -38,11 +38,9 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY) // getToDo 를 할때 조인방식
     private List<ToDo> todos;
 
-//    public User(UserJoinRequest dto) {
-//        this.account = dto.getAccount();
-//        this.userName = dto.getUserName();
-//        this.email = dto.getEmail();
-//        this.password = dto.getPassword();
-//    }
 
+    // JPA 양방향 순환참조 에러 - JSON 으로 직렬화 할때에 에러
+    // 로그인 시 user 정보를 응답데이터로 전달하는데 user 의 todos 에 todos 가 참조하는 user 데이터가 조인되고, 그 user 데이터의 todos 가 참조 또 todos 의 user 가 참조... -> 무한반복 에러
+    // 해결방법 1. @JsonIgnore - 직렬화시(Entity 를 Json 으로 변환시) 해당 필드를 무시하므로 JSON 직렬화 할때 데이터가 전달이 안됨
+    // 해결방법 2. DTO 반환 - Entity 를 직접 반환하는 것이 아니라 DTO(Entity 와 동일한 형태) 를 반환
 }
