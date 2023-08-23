@@ -5,16 +5,19 @@ import com.example.todolist_backend.domain.User;
 import com.example.todolist_backend.dto.UserLoginRequest;
 import com.example.todolist_backend.dto.todo.ToDoCreateRequest;
 import com.example.todolist_backend.dto.todo.ToDoCreateResponse;
+import com.example.todolist_backend.dto.todo.ToDoDTO;
 import com.example.todolist_backend.repository.ToDoRepository;
 import com.example.todolist_backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ToDoService {
-
     private final UserRepository userRepository;
     private final ToDoRepository toDoRepository;
 
@@ -52,5 +55,14 @@ public class ToDoService {
         return list;
     }
 
+    // JPA 양방향 순환참조 에러 처리위해 엔티티대신 DTO 로 치환 -> 로그인 유저 응답데이터로 List<ToDo> 를 보내지 않고, user data 만 넣으니까 순환참조 안일어남.
+//    public List<ToDoDTO> list(Long uId) {
+//        List<ToDo> entityList = toDoRepository.findByUser_Id(uId);
+//        List<ToDoDTO> todos = new ArrayList<>();
+//        for(ToDo todo : entityList) {
+//            todos.add(ToDoDTO.convertDTO(todo));
+//        }
+//        return todos;
+//    }
 
 }
