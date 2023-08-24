@@ -3,6 +3,7 @@ package com.example.todolist_backend.controller;
 import com.example.todolist_backend.domain.ToDo;
 import com.example.todolist_backend.dto.todo.ToDoCreateRequest;
 import com.example.todolist_backend.dto.todo.ToDoCreateResponse;
+import com.example.todolist_backend.dto.todo.ToDoDTO;
 import com.example.todolist_backend.service.ToDoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,20 +17,17 @@ import java.util.List;
 public class ToDoController {
     private final ToDoService toDoService;
 
-    @PostMapping("/{uId}/todos")
-    public ResponseEntity<ToDoCreateResponse> register(@PathVariable Long uId, @RequestBody ToDoCreateRequest toDoCreateRequest) {
-        // toDoService.createToDo(toDoCreateRequest);
-        // return ResponseEntity.ok().body("투두 등록이 완료 되었습니다.");
+    @GetMapping("/{uId}/list")
+    public ResponseEntity<List<ToDoDTO>> list(@PathVariable Long uId) { // 응답데이터 - List<ToDoDTO>
+        return ResponseEntity.ok().body(toDoService.list(uId));
+    }
 
+    @PostMapping("/{uId}/register")
+    public ResponseEntity<ToDoCreateResponse> register(@PathVariable Long uId, @RequestBody ToDoCreateRequest toDoCreateRequest) { // url 의 uId 를 받고, toDoCreateRequest 를 응답 body 에 받겠다.
         return ResponseEntity.ok().body(toDoService.createToDo(toDoCreateRequest));
     }
 
-    @GetMapping("/{uId}/list")
-    public ResponseEntity<List<ToDo>> list(@PathVariable Long uId) {
-        return ResponseEntity.ok().body(toDoService.list(uId));
-
-    }
-
+    // security 인증 - 사용자 확인 테스트
     @GetMapping("/")
     public String getToDo(@AuthenticationPrincipal String account) { // jwtFilter 에 SecurityContext 에 인증할 객체로 account 를 담았기때문에, account 정보를 가져와 쓸수있다.
         return "로그인된 사용자는 " + account + "입니다.";
