@@ -50,19 +50,14 @@ public class ToDoService {
     }
 
     // todo 리스트
-    public List<ToDo> list(Long uId) {
-        List<ToDo> list = toDoRepository.findByUser_Id(uId);
-        return list;
+    // JPA 양방향 순환참조 에러 처리위해 엔티티대신 DTO 로 치환 -> 컨트롤러에서 list 요청 시 서비스, List<ToDo> 의 ToDo 는 JPA 엔티티로, user 데이터가 담겨서 순환참조 에러 발생되므로 ->  ToDoDTO 로 다시 변경함.
+    public List<ToDoDTO> list(Long uId) {
+        List<ToDo> entityList = toDoRepository.findByUser_Id(uId);
+        List<ToDoDTO> todos = new ArrayList<>();
+        for(ToDo todo : entityList) {
+            todos.add(ToDoDTO.convertDTO(todo));
+        }
+        return todos;
     }
-
-    // JPA 양방향 순환참조 에러 처리위해 엔티티대신 DTO 로 치환 -> 로그인 유저 응답데이터로 List<ToDo> 를 보내지 않고, user data 만 넣으니까 순환참조 안일어남.
-//    public List<ToDoDTO> list(Long uId) {
-//        List<ToDo> entityList = toDoRepository.findByUser_Id(uId);
-//        List<ToDoDTO> todos = new ArrayList<>();
-//        for(ToDo todo : entityList) {
-//            todos.add(ToDoDTO.convertDTO(todo));
-//        }
-//        return todos;
-//    }
 
 }
