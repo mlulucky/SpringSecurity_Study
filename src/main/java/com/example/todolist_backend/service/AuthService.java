@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+// @Transactional
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
@@ -76,7 +76,7 @@ public class AuthService {
             return ResponseDto.setFailed("데이터베이스 에러");
         }
 
-        user.setPassword("");  // 유저 비밀번호를 "" 으로 한다 -> 로그인 응답 데이터에서 비밀번호 안보이게 하기
+        // user.setPassword("");  // 유저 비밀번호를 "" 으로 한다 -> 로그인 응답 데이터에서 비밀번호 안보이게 하기
 
         String token = tokenProvider.create(account);
         int experTime = 1000 * 60 * 60;
