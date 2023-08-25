@@ -35,10 +35,11 @@ public class ToDoService {
         ToDo todo = ToDo.builder()
                 .content(dto.getContent())
                 .done(dto.isDone())
-                .user(userOptional.get()) // 투두 작성한 유저
+                .user(userOptional.orElse(null)) // user 가 찾은 사용자로 설정되거나 userOptional 이 비어 있으면 null 로 설정
+//                .user(userOptional.get()) // 투두 작성한 유저
                 .build();
 
-        // db 저장 -> todo 를 리턴해줌
+        // db 저장 -> todo 를 리턴해줌 // 🎄 repository 코드 - try catch 적용하기
         ToDo savedToDo = toDoRepository.save(todo);
 
         // 생성된 todo 반환 // return new ToDoCreateResponse();
