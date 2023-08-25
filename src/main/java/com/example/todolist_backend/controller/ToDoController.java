@@ -22,10 +22,14 @@ public class ToDoController {
         return ResponseEntity.ok().body(toDoService.list(uId));
     }
 
-    @PostMapping("/{uId}/register")
-    public ResponseEntity<ToDoCreateResponse> register(@PathVariable Long uId, @RequestBody ToDoCreateRequest toDoCreateRequest) { // url 의 uId 를 받고, toDoCreateRequest 를 응답 body 에 받겠다.
+    @PostMapping("/register")
+    public ResponseEntity<ToDoCreateResponse> register(@RequestBody ToDoCreateRequest toDoCreateRequest) { // url 의 uId 를 받고, toDoCreateRequest 를 응답 body 에 받겠다.
         return ResponseEntity.ok().body(toDoService.createToDo(toDoCreateRequest));
     }
+//    @PostMapping("/{uId}/register")
+//    public ResponseEntity<ToDoCreateResponse> register(@PathVariable Long uId, @RequestBody ToDoCreateRequest toDoCreateRequest) { // url 의 uId 를 받고, toDoCreateRequest 를 응답 body 에 받겠다.
+//        return ResponseEntity.ok().body(toDoService.createToDo(toDoCreateRequest));
+//    }
 
     // security 인증 - 사용자 확인 테스트
     @GetMapping("/")
