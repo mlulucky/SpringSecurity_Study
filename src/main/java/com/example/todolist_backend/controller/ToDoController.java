@@ -26,13 +26,14 @@ public class ToDoController {
     public ResponseEntity<ToDoCreateResponse> register(@RequestBody ToDoCreateRequest toDoCreateRequest) { // url 의 uId 를 받고, toDoCreateRequest 를 응답 body 에 받겠다.
         return ResponseEntity.ok().body(toDoService.createToDo(toDoCreateRequest));
     }
-//    @PostMapping("/{uId}/register")
-//    public ResponseEntity<ToDoCreateResponse> register(@PathVariable Long uId, @RequestBody ToDoCreateRequest toDoCreateRequest) { // url 의 uId 를 받고, toDoCreateRequest 를 응답 body 에 받겠다.
-//        return ResponseEntity.ok().body(toDoService.createToDo(toDoCreateRequest));
-//    }
+
+    @PatchMapping("/modify")
+    public ResponseEntity<ToDoDTO> modify(@RequestBody ToDoDTO toDoDTO) {
+        return ResponseEntity.ok().body(toDoService.modifyToDo(toDoDTO));
+    }
 
     // security 인증 - 사용자 확인 테스트
-    @GetMapping("/")
+    @GetMapping("/usercheck")
     public String getToDo(@AuthenticationPrincipal String account) { // jwtFilter 에 SecurityContext 에 인증할 객체로 account 를 담았기때문에, account 정보를 가져와 쓸수있다.
         return "로그인된 사용자는 " + account + "입니다.";
     }

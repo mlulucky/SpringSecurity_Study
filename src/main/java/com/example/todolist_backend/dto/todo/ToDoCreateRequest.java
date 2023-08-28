@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @Getter // 필드의 getter 메서드 자동 생성
 public class ToDoCreateRequest { // 사용자 요청 -> db 에 이 내용으로 저장
      private Long userId;
-    // private String userName;
     private String content;
     private boolean done;
 

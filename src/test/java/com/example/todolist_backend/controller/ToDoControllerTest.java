@@ -52,7 +52,6 @@ class ToDoControllerTest {
     // @WithMockUser(username = "testUser", password = "testPassword", authorities = "ROLE_USER")
     @WithMockUser
     void add() throws Exception {
-        // long userId = 1;
         String content = "투두등록 테스트";
         String account = "user111";
         String password = "1234";

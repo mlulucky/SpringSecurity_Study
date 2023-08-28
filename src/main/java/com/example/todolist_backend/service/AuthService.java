@@ -14,12 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-// @Transactional
+@Transactional
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
-
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public ResponseDto<?> join(UserJoinRequest dto) {
@@ -38,12 +37,9 @@ public class AuthService {
         // 비밀번호가 서로 다르면 failed response 반환
         if(!password.equals(passwordCheck))
             return ResponseDto.setFailed("비밀번호가 맞지 않습니다.");
-
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(password);
         // 유저 생성
-         // User user = new User(dto);
-         // user.setPassword(encodedPassword);
          User user = User.builder()
                  .account(account)
                  .userName(dto.getUserName())

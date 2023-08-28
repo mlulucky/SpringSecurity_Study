@@ -11,22 +11,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class UserService {
-
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder encoder;
-
     @Value("${jwt.token.secret}") // application 환경변수로 지정
     private String key; // jwt 토큰생성 키
     private Long expireTimeMs = 1000 * 60 * 60l; // l : long
-
 
     public String join(UserJoinRequest dto) {
 
@@ -34,7 +33,6 @@ public class UserService {
         userRepository.findByUserName(dto.getUserName())
                 //.ifPresent(user -> { throw new RuntimeException(dto.getUserName() + "는 이미 있습니다.");
                 .ifPresent(user -> { throw new AppException(ErrorCode.USERNAME_DUPLICATED, dto.getUserName() + "는 이미 있습니다.");
-
                 }); // 유저가 있으면 -> 에러처리
 
         // 저장
@@ -46,7 +44,6 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
-
         return "SUCCESS";
     }
 

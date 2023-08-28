@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 public class ToDoCreateResponse {
-    // private String userName;
+    private Long id;
     private String content;
     private boolean done;
     private String message; // 요청이 잘 처리됬는지 메세지
