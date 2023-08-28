@@ -1,11 +1,13 @@
 package com.example.todolist_backend.service;
 
+import com.example.todolist_backend.domain.RefreshToken;
 import com.example.todolist_backend.domain.User;
 import com.example.todolist_backend.dto.UserLoginRequest;
 import com.example.todolist_backend.dto.ResponseDto;
 import com.example.todolist_backend.dto.user.UserJoinRequest;
 import com.example.todolist_backend.dto.user.UserLoginData;
 import com.example.todolist_backend.dto.user.UserLoginResponse;
+import com.example.todolist_backend.repository.RefreshTokenRepository;
 import com.example.todolist_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public ResponseDto<?> join(UserJoinRequest dto) {
@@ -60,26 +63,39 @@ public class AuthService {
     public ResponseDto<UserLoginResponse> login(UserLoginRequest dto) {
         String account = dto.getAccount(); // 🌈 spring validate 설정 추가하기??
         String password = dto.getPassword();
-        User user = null;
-        try {
-            user = userRepository.findByAccount(account);
-            // 잘못된 계정
-            if(user == null) return ResponseDto.setFailed("로그인 실패 _ 잘못된 계정");
-            // 잘못된 패스워드
-            if(!passwordEncoder.matches(password, user.getPassword())) // passwordEncoder.matches : matches 는 암호화된 문자열을 DB 등에 저장된 값과 비교할 때 사용
-                return ResponseDto.setFailed("로그인 실패 _ 잘못된 패스워드");
-        } catch (Exception error) {
-            return ResponseDto.setFailed("데이터베이스 에러");
-        }
 
-        // user.setPassword("");  // 유저 비밀번호를 "" 으로 한다 -> 로그인 응답 데이터에서 비밀번호 안보이게 하기
+        User user = userRepository.findByAccount(account)
+                .filter(it -> passwordEncoder.matches(password, it.getPassword()))
+                .orElseThrow(()-> new IllegalArgumentException("아이디 또는 비밀번호 일치하지 않습니다."));
+
+
+
+
+
+        // User user = null;
+//        try {
+//            user = userRepository.findByAccount(account);
+//            // 잘못된 계정
+//            if(user == null) return ResponseDto.setFailed("로그인 실패 _ 잘못된 계정");
+//            // 잘못된 패스워드
+//            if(!passwordEncoder.matches(password, user.getPassword())) // passwordEncoder.matches : matches 는 암호화된 문자열을 DB 등에 저장된 값과 비교할 때 사용
+//                return ResponseDto.setFailed("로그인 실패 _ 잘못된 패스워드");
+//        } catch (Exception error) {
+//            return ResponseDto.setFailed("데이터베이스 에러");
+//        }
 
         String token = tokenProvider.create(account);
+        String refreshToken = tokenProvider.createRefreshToken();
+
         int experTime = 1000 * 60 * 60;
+
+        // 리프레시 토큰이 있다면 토큰 갱신, 없다면 리프레시토큰 생성 및 저장
+        refreshTokenRepository.findById(user.getId())
+                .ifPresentOrElse(it->it.updateRefreshToken(refreshToken), ()->refreshTokenRepository.save(new RefreshToken(user, refreshToken)));
 
         UserLoginData userData = new UserLoginData(user.getId(), user.getAccount(), user.getUserName());
 
-        UserLoginResponse userLoginResponseDto = new UserLoginResponse(token, experTime, userData);
+        UserLoginResponse userLoginResponseDto = new UserLoginResponse(token, experTime, userData, refreshToken);
         return ResponseDto.setSuccess("로그인 성공했습니다.", userLoginResponseDto);
 
     }
