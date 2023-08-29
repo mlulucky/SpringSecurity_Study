@@ -12,7 +12,7 @@ import java.util.UUID;
 @Getter
 public class RefreshToken { // 리프레시 토큰 테이블
     @Id
-    private Long userId;
+    private Long userId; // 유저 식별을 위해
     private String refreshToken;
     private int reissueCount = 0; // ??
 
@@ -28,7 +28,8 @@ public class RefreshToken { // 리프레시 토큰 테이블
     }
     public void increaseReissueCount(){
         reissueCount++;
-    }
+    } // 리프레쉬토큰 재발급 횟수 저장
+
     @OneToOne(fetch = FetchType.LAZY) // 회원 1명 당 리프레시토큰 1개
     @MapsId // 연관 엔티티의 primary key 를 현재 엔티티의 primary 키와 맵핑. primary 키를 공유
     @JoinColumn(name = "user_id")

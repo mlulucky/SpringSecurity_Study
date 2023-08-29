@@ -25,6 +25,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -49,7 +51,6 @@ class ToDoControllerTest {
 
     @Test
     @DisplayName("투두등록 성공")
-    // @WithMockUser(username = "testUser", password = "testPassword", authorities = "ROLE_USER")
     @WithMockUser
     void add() throws Exception {
         String content = "투두등록 테스트";
@@ -59,7 +60,8 @@ class ToDoControllerTest {
          UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
          String userId = userDetails.getUsername();
 
-        User user = userRepository.findByAccount(account);
+        Optional<User> user = userRepository.findByAccount(account);
+        // User user = userRepository.findByAccount(account);
 
         ToDoCreateRequest request = new ToDoCreateRequest(content);
 

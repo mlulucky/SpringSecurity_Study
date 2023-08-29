@@ -12,7 +12,8 @@ public class ToDoDTO {
     private Long id;
     private String content;
     private boolean done;
-     private Long userId;
+    private int userId;
+    // private Long userId;
 
     public static ToDoDTO convertDTO(ToDo todo) {
         return new ToDoDTO(
