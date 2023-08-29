@@ -1,7 +1,6 @@
 package com.example.todolist_backend.repository;
 
 import com.example.todolist_backend.domain.ToDo;
-import com.example.todolist_backend.dto.todo.ToDoCreateRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

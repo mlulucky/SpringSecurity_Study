@@ -12,6 +12,7 @@ import java.util.UUID;
 @Getter
 public class RefreshToken { // 리프레시 토큰 테이블
     @Id
+//    private int userId; // 유저 식별을 위해
     private Long userId; // 유저 식별을 위해
     private String refreshToken;
     private int reissueCount = 0; // ??

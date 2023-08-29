@@ -12,8 +12,8 @@ public class ToDoDTO {
     private Long id;
     private String content;
     private boolean done;
-    private int userId;
-    // private Long userId;
+    // private int userId;
+     private Long userId;
 
     public static ToDoDTO convertDTO(ToDo todo) {
         return new ToDoDTO(
@@ -21,6 +21,7 @@ public class ToDoDTO {
                 todo.getContent(),
                 todo.isDone(),
                 todo.getUser() != null ? todo.getUser().getId() : null
+                // todo.getUser().getId()
         );
     }
 

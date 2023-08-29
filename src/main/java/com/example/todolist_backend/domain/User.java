@@ -17,8 +17,8 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본키를 자동으로 생성해주는 어노테이션
-    private int id;
-//    private Long id;
+//    private int id;
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String account;

@@ -35,14 +35,13 @@ class TokenProviderTest {
     ToDoService toDoService;
     @MockBean
     UserController userController;
-     @MockBean
-    // @Autowired
+    @MockBean
     RefreshTokenRepository refreshTokenRepository;
 
     @Test
     @WithMockUser
     void createToken() {
-        int userId = 1;
+        Long userId = 1L;
         String token = tokenProvider.create(userId);
         // String account = "user1";
 //        String token = tokenProvider.create(account);
@@ -64,11 +63,10 @@ class TokenProviderTest {
 
     @Test
     void recreateAccessToken() throws JsonProcessingException {
-     int userId = 1;
-     // String account = "1";
+     Long userId = 1L;
      String token = tokenProvider.create(userId);
-    String newAccessToken = tokenProvider.recreateAccessToken(token);
-        System.out.println("newAccessToken = " + newAccessToken);
+     String newAccessToken = tokenProvider.recreateAccessToken(token);
+     System.out.println("newAccessToken = " + newAccessToken);
 }
 
     @Test
@@ -76,6 +74,8 @@ class TokenProviderTest {
     }
 
     @Test
-    void decodeJwtPayloadSubject() {
+    void decodeJwtPayloadSubject() throws JsonProcessingException {
+        String subject = tokenProvider.decodeJwtPayloadSubject("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiaWF0IjoxNjkzMzIwMDA1LCJleHAiOjE2OTMzMjM2MDV9.me_uNt9m4AW6dov2yE4R0iSb7EbXTSKGdOGhdyZ3y_I");
+        System.out.println("subject = " + subject);
     }
 }

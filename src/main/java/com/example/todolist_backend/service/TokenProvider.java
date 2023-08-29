@@ -18,10 +18,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 // JWT(json web token) : 전자 서명이 된 토큰
 // JSON 형태로 구성된 토큰
@@ -29,11 +26,11 @@ import java.util.UUID;
 // header: typ(해당 토큰의 타입), alg(토큰을 서명하기 위해 사용된 해시 알고리즘)
 // payload: sub(해당 토큰의 주인), iat(토큰이 발행된 시간), exp(토큰이 만료되는 시간)
 
-// @PropertySource("classpath:jwt.yml")
+// @PropertySource("classpath:application-jwt.yml")
 @Service
 public class TokenProvider {
     // JWT 생성 및 검증을 위한 키
-    private String secretKey;
+    private final String secretKey;
     private final long expirationMinutes;
     private final long refreshExpirationHours;
     private final String issuer;
@@ -45,6 +42,7 @@ public class TokenProvider {
     public TokenProvider(
             @Value("${jwt.token.secret}") String secretKey,
             @Value("${expiration-minutes}") long expirationMinutes,
+//            @Value("${expiration-minutes}") long expirationMinutes,
             @Value("${refresh-expiration-hours}") long refreshExpirationHours,
             @Value("${issuer}") String issuer,
             RefreshTokenRepository refreshTokenRepository
@@ -54,23 +52,25 @@ public class TokenProvider {
         this.refreshExpirationHours= refreshExpirationHours;
         this.issuer = issuer;
         this.refreshTokenRepository = refreshTokenRepository;
-        reissueLimit = refreshExpirationHours * 60 / expirationMinutes; // 재발급 한도
+        this.reissueLimit = refreshExpirationHours * 60 / 30; // 재발급 한도
+//        reissueLimit = refreshExpirationHours * 60 / expirationMinutes; // 재발급 한도
     }
 
     // JWT 토큰 생성하는 메서드
-    public String create(int userId) {
+    public String create(Long userId) {
 //    public String create(String account) {
         // 만료날짜 현재시간 + 1시간 으로 설정
         Date experTime = Date.from(Instant.now().plus(1, ChronoUnit.HOURS));
         // JWT 를 생성
         return Jwts.builder()
                 // 암호화에 사용될 알고리즘, 키
-                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .signWith(new SecretKeySpec(secretKey.getBytes(), SignatureAlgorithm.HS256.getJcaName()))
+                // .signWith(SignatureAlgorithm.HS256, secretKey)
                 // JWT 제목, 생성일, 만료일 설정
-                .setSubject(String.valueOf(userId)).setIssuedAt(new Date()).setExpiration(experTime) // subject 를 "userId" 문자열로
-//                .setSubject("${userId}").setIssuedAt(new Date()).setExpiration(experTime) // subject 를 "userId" 문자열로
-                // .setSubject(account).setIssuedAt(new Date()).setExpiration(experTime)
-                // 생성
+                .setSubject(String.valueOf(userId)) // subject 를 "userId" 문자열로
+                .setIssuer(issuer)
+                .setIssuedAt(new Date())
+                .setExpiration(experTime)
                 .compact();
     }
 
@@ -99,23 +99,21 @@ public class TokenProvider {
     @Transactional // 데이터베이스와 관련된 작업인 경우
     public String recreateAccessToken(String oldAccessToken) throws JsonProcessingException {
          String subject = decodeJwtPayloadSubject(oldAccessToken);
-        // UserRepository userRepository;
-        // User user = userRepository.findByAccount(subject);
-
          System.out.println("subject = " + subject);
-         refreshTokenRepository.findByUserIdAndReissueCountLessThan(Integer.parseInt(subject), reissueLimit) // 👀 : 으로 분리? subject 어떻게 출력 // 문자열(subject)을 Long 타입으로 변환
-//         refreshTokenRepository.findByUserIdAndReissueCountLessThan(Long.parseLong(subject), reissueLimit) // 👀 : 으로 분리? subject 어떻게 출력 // 문자열(subject)을 Long 타입으로 변환
-//         refreshTokenRepository.findByUserIdAndReissueCountLessThan(Long.parseLong(subject.split(":")[0]), reissueLimit) // 👀 : 으로 분리? subject 어떻게 출력 // 문자열(subject)을 Long 타입으로 변환
-         .ifPresentOrElse(RefreshToken::increaseReissueCount, ()->{ throw  new ExpiredJwtException(null, null, "리프레시 토큰이 만료되었습니다."); }); // header, claims, message
-            // 리프레시 토큰이 있을 경우 increaseReissueCount 실행(리프레시토큰 엔티티 메서드_ 재발급횟수+1) // 리프레시 토큰이 유효하지 않거나 만료됬을 경우 예외처리
-        return create(Integer.parseInt(subject)); // 새로운 토큰생성 및 반환
-        //return create(subject); // 새로운 토큰생성 및 반환
+
+        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUserIdAndReissueCountLessThan(Long.parseLong(subject), reissueLimit);
+        refreshToken.orElseThrow(()->{ throw new ExpiredJwtException(null, null, "리프레시 토큰이 만료되었습니다.");}); // header, claims, message
+        // 3. 리프레시 토큰 처리
+        refreshToken.ifPresent(refresh -> refreshToken.get().increaseReissueCount());
+
+        // 리프레시 토큰이 있을 경우 increaseReissueCount 실행(리프레시토큰 엔티티 메서드_ 재발급횟수+1) // 리프레시 토큰이 유효하지 않거나 만료됬을 경우 예외처리
+        return create(Long.parseLong(subject)); // 새로운 토큰생성 및 반환
     }
 
     // refresh 토큰 유효성 검사
     @Transactional(readOnly = true) // 데이터 읽기만 가능. 수정불가
     public void validateRefreshToken(String refreshToken, String oldAccessToken) throws JsonProcessingException {
-         // validateParseToken(refreshToken);
+        // validateParseToken(refreshToken);
         // 토큰 유효성검사 및 파싱
         Jwts.parserBuilder()
                     .setSigningKey(secretKey.getBytes())
@@ -123,8 +121,7 @@ public class TokenProvider {
                     .parseClaimsJws(refreshToken);
 
         String subject = decodeJwtPayloadSubject(oldAccessToken);
-        // String userId = decodeJwtPayloadSubject(oldAccessToken).split(":")[0];
-        refreshTokenRepository.findByUserIdAndReissueCountLessThan(Integer.parseInt(subject), reissueLimit)
+        refreshTokenRepository.findByUserIdAndReissueCountLessThan(Long.parseLong(subject), reissueLimit)
 //        refreshTokenRepository.findByUserIdAndReissueCountLessThan(Integer.parseInt((subject), reissueLimit)
                 .filter(userRefreshToken -> userRefreshToken.validateRefreshToken(refreshToken)) // RefreshToken 메서드 - validateRefreshToken // 저장소에 저장된 유저의 리프레시 토큰과 요청 들어온 리프레시토큰을 유효성검사
                 .orElseThrow(()->new ExpiredJwtException(null, null, "리프레시 토큰이 만료되었습니다."));

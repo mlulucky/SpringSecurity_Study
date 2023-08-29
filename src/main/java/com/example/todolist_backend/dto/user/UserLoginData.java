@@ -9,8 +9,8 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 public class UserLoginData {
-    private int id;
-    // private Long id;
+    // private int id;
+     private Long id;
     private String account;
     private String userName;
 }

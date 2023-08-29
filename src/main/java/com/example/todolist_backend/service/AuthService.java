@@ -84,7 +84,8 @@ public class AuthService {
 //            return ResponseDto.setFailed("데이터베이스 에러");
 //        }
 
-        String token = tokenProvider.create(account);
+        String token = tokenProvider.create(user.getId());
+//        String token = tokenProvider.create(account);
         String refreshToken = tokenProvider.createRefreshToken();
 
         int experTime = 1000 * 60 * 60;
