@@ -1,7 +1,9 @@
 package com.example.todolist_backend.config;
 
+import com.example.todolist_backend.domain.User;
 import com.example.todolist_backend.service.TokenProvider;
 import com.example.todolist_backend.service.UserService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -36,20 +38,25 @@ public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         try{
-            String token = parseBearerToken(request);
-            if(token !=null && !token.equalsIgnoreCase("null")) {
-                String account = tokenProvider.validate(token);
+            String accessToken = parseBearerToken(request);
+            if(accessToken !=null && !accessToken.equalsIgnoreCase("null")) { // 토큰이 있으면
+                String account = tokenProvider.validate(accessToken);
+
                 // SecurityContext 에 추가할 객체 //  사용자 인증 객체를 생성 (사용자식별정보, 패스워드정보, 사용자 권한정보)
-                AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(account, null, AuthorityUtils.NO_AUTHORITIES);
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                // AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(account, accessToken, AuthorityUtils.NO_AUTHORITIES);
+                // AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(account, null, AuthorityUtils.NO_AUTHORITIES);
+                // authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                AbstractAuthenticationToken authenticationToken = createAuthenticationToken(account,  accessToken, request);
 
                 // SecurityContext 에 AbstractAuthenticationToken 객체를 추가해서 해당 Thread 가 지속적으로 인증 정보를 가질수 있도록 해줌
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
                 securityContext.setAuthentication(authenticationToken);
                 SecurityContextHolder.setContext(securityContext);
             }
+        } catch (ExpiredJwtException e) {
+            reissueAccessToken(request, response, e);
         } catch (Exception e) {
-            e.printStackTrace();
+            request.setAttribute("exception", e);
         }
         filterChain.doFilter(request, response); // request 가 인증이 되면 response 를 응답
     }
@@ -62,6 +69,39 @@ public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체
             return bearerToken.substring(7); // substring(n) : 인덱스가 n 이후인 값 반환
         }
         return null;
+    }
+
+    // 리프레시 토큰 + 만료된 액세스 토큰 -> 액세스 토큰 발급 + 사용자 인증 => 응답헤더에 새로운 액세스 토큰 반환
+    private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response, Exception exception) {
+        try{
+            String refreshToken = parseBearerToken(request); // 👀
+            if(refreshToken == null) {
+                throw exception;
+            }
+            String oldAccessToken = parseBearerToken(request);
+            tokenProvider.validateRefreshToken(refreshToken, oldAccessToken);
+            String newAccessToken = tokenProvider.recreateAccessToken(oldAccessToken);
+            String account = tokenProvider.validate(newAccessToken);
+
+//            AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(account, newAccessToken, AuthorityUtils.NO_AUTHORITIES);
+//            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            AbstractAuthenticationToken authenticationToken = createAuthenticationToken(account, newAccessToken, request);
+
+            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+            securityContext.setAuthentication(authenticationToken);
+            SecurityContextHolder.setContext(securityContext);
+
+            response.setHeader("New-Access-Token", newAccessToken);
+        } catch (Exception e) {
+            request.setAttribute("exception", e);
+        }
+
+    }
+
+    private  AbstractAuthenticationToken createAuthenticationToken(String account, String token, HttpServletRequest request) {
+        AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(account, token, AuthorityUtils.NO_AUTHORITIES);
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        return authenticationToken;
     }
 
 
