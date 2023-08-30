@@ -85,10 +85,9 @@ public class AuthService {
 //        }
 
         String token = tokenProvider.create(user.getId());
-//        String token = tokenProvider.create(account);
         String refreshToken = tokenProvider.createRefreshToken();
-
         int experTime = 1000 * 60 * 60;
+
 
         // 리프레시 토큰이 있다면 토큰 갱신, 없다면 리프레시토큰 생성 및 저장
         refreshTokenRepository.findById(user.getId())

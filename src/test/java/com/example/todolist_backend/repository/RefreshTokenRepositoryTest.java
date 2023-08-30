@@ -28,11 +28,13 @@ class RefreshTokenRepositoryTest {
     private RefreshTokenRepository repository;
     @Test
     void findByUserIdAndReissueCountLessThan() {
-        Long tokenSubject = 1L;
+        Long tokenSubject = 28L; // 실제 db 테이블에 저장된 유저id
         long reissueLimit = 24*60 / 30; // 재발급횟수
-        Optional<RefreshToken> refreshToken = repository.findByUserIdAndReissueCountLessThan(tokenSubject, reissueLimit);
+        Optional<RefreshToken> refreshToken = repository.findByUserId(tokenSubject);
+        // Optional<RefreshToken> refreshToken = repository.findByUserIdAndReissueCountLessThan(tokenSubject, reissueLimit);
         refreshToken.orElseThrow(()-> {throw new ExpiredJwtException(null, null, "리프레시 토큰이 만료되었습니다.");});
         refreshToken.ifPresent(refresh -> refreshToken.get().increaseReissueCount());
         System.out.println("refreshToken = " + refreshToken);
+        System.out.println("refreshToken = " + refreshToken.get().getReissueCount());
     }
 }

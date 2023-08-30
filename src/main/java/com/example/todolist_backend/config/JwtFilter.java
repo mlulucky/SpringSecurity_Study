@@ -81,6 +81,7 @@ public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체
             String oldAccessToken = parseBearerToken(request);
             tokenProvider.validateRefreshToken(refreshToken, oldAccessToken);
             String newAccessToken = tokenProvider.recreateAccessToken(oldAccessToken);
+            // String newAccessToken = tokenProvider.recreateAccessToken(oldAccessToken);
             String account = tokenProvider.validate(newAccessToken);
 
 //            AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(account, newAccessToken, AuthorityUtils.NO_AUTHORITIES);

@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -12,7 +13,6 @@ import java.util.UUID;
 @Getter
 public class RefreshToken { // 리프레시 토큰 테이블
     @Id
-//    private int userId; // 유저 식별을 위해
     private Long userId; // 유저 식별을 위해
     private String refreshToken;
     private int reissueCount = 0; // ??
@@ -21,6 +21,7 @@ public class RefreshToken { // 리프레시 토큰 테이블
         this.user = user;
         this.refreshToken = refreshToken;
     }
+
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
