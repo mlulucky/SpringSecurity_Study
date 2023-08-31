@@ -29,7 +29,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .httpBasic(withDefaults()) // HTTP Basic _ 토큰 인증 // withDefaults() 기본설정
+                .httpBasic(withDefaults()) // HTTP Basic _ 토큰 인증(headers : Authorization : id, pw -> https 방식으로 하는 경우 id, pw 가 암호화되어 전달된다. ) // withDefaults() 기본설정
                 .csrf(CsrfConfigurer::disable) // csrf 보호 비활성화 // rest api 서버에서는 csrf를 disable // JWT 같은 토큰을 이용하는 Api 서버 용도 라면 csrf 에 안전
                 .cors(CorsConfigurer::disable) // cors 보호 비활성화 // cors 는 교차출처(다른출처) 리소스 공유 정책을 설정 // post 가 정상적으로 수행되지 않는다. 그래서 disable() 해야함
                 .authorizeHttpRequests(requests -> // HTTP 요청에 대한 인증 및 접근 권한을 설정
