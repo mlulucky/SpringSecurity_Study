@@ -39,7 +39,6 @@ class TokenProviderTest {
     @Value("${expiration-minutes}") long expirationMinutes;
     @Value("${refresh-expiration-hours}") long refreshExpirationHours;
     @Value("${issuer}") String issuer;
-    // long reissueLimit = refreshExpirationHours * 60 / 30;
 
     @Test
     @WithMockUser
@@ -48,8 +47,6 @@ class TokenProviderTest {
         String token = tokenProvider.create(userId);
         System.out.println("token = " + token);
     }
-
-
 
     @Test
     void validate() {
@@ -67,11 +64,6 @@ class TokenProviderTest {
 
     @Test
     void recreateAccessToken() throws JsonProcessingException {
-        // recreateAccessToken 에러사항
-        // 👀 reissueLimit 변수는  TokenProvider 클래스 멤버변수 이므로 테스트 클래스 TokenProviderTest 내에서 직접 접근할 수없다.
-        // TokenProvider 객체를 생성하고 그 객체를 통해 접근해야한다. -> // 객체는 @Autowired 로 주입받았기 때문에, 객체 내 멤버필드 reissueLimit 만 변수 선언 해주기!
-        // TokenProvider tokenProvider = new TokenProvider(secretKey, expirationMinutes, refreshExpirationHours, issuer, refreshTokenRepository);
-        // long reissueLimit = refreshExpirationHours * 60 / 30;
         Long userId = 28L;
         String token = tokenProvider.create(userId);
         System.out.println("token = " + token);
@@ -81,13 +73,13 @@ class TokenProviderTest {
 
     @Test
     void validateRefreshToken() throws JsonProcessingException {
-     Long userId = 28L;
-        String refreshToken = tokenProvider.createRefreshToken();
+        Long userId = 28L;
+        // 28 유저가 가지고 있는 리프레시토큰 // 토큰 검사할때 유저 -> 서버에 요청하는 리프레시토큰(유저가 가지고 있는 토큰)과 db 저장된 유저의 리프레시토큰을 비교
+        String requestRefreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJtbHVja3kiLCJpYXQiOjE2OTM0NDI5NzMsImV4cCI6MTY5MzUyOTM3M30.vbVvBp25OQDPFV268cKjRzn-EV6uxmYovH8wKsc075vYiTx-2YCam7y9RgWoo5ZQI1rxplYjpNPed1je2HK1rg";
         String token = tokenProvider.create(userId);
-        System.out.println("token = " + token);
         Jws<Claims> ParseToken = tokenProvider.validateAndParseToken(token);
         System.out.println("ParseToken = " + ParseToken);
-        tokenProvider.validateRefreshToken(refreshToken, token);
+        tokenProvider.validateRefreshToken(requestRefreshToken, token);
     }
 
     @Test
