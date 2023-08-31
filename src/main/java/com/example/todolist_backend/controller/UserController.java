@@ -7,6 +7,7 @@ import com.example.todolist_backend.dto.user.UserLoginResponse;
 import com.example.todolist_backend.service.AuthService;
 import com.example.todolist_backend.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,15 +22,15 @@ public class UserController {
     // ResponseEntity : HTTP 응답을 표현하기 위한 클래스, 클라이언트에게 응답을 생성하고 반환(응답의 상태 코드, 헤더, 본문 등을 정의할 수 있다)
     // <String>: ResponseEntity 가 응답 본문으로 문자열(String) 데이터를 지정. 응답 본문은 클라이언트에게 전달될 데이터
     @PostMapping("/join")
-    public ResponseDto<?> join(@RequestBody UserJoinRequest requestBody)  { // <?> : 타입 와일드카드
-        ResponseDto<?> result = authService.join(requestBody);
+    public ResponseDto<?> join(@RequestBody UserJoinRequest joinRequestBody)  { // <?> : 타입 와일드카드
+        ResponseDto<?> result = authService.join(joinRequestBody);
         return result; // 회원가입 응답 dto ==  result(회원가입 성공여부), message, data { null }
     }
 
     // 로그인 응답 dto ==  result(로그인 성공여부), message, data { accessToken, experTime(토큰만료시간), user(유저정보) }
     @PostMapping("/login")
-    public ResponseDto<UserLoginResponse> login(@RequestBody UserLoginRequest requestBody) {
-        ResponseDto<UserLoginResponse> result = authService.login(requestBody);
+    public ResponseDto<UserLoginResponse> login(@RequestBody UserLoginRequest loginRequestBody, HttpServletResponse response) {
+        ResponseDto<UserLoginResponse> result = authService.login(loginRequestBody, response);
         return result;
     }
 
