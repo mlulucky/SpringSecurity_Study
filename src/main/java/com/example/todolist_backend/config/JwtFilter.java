@@ -40,14 +40,9 @@ public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체
         try{
             String accessToken = parseBearerToken(request);
             if(accessToken !=null && !accessToken.equalsIgnoreCase("null")) { // 토큰이 있으면
-                String account = tokenProvider.validate(accessToken);
-
+                String userId = tokenProvider.validate(accessToken);
                 // SecurityContext 에 추가할 객체 //  사용자 인증 객체를 생성 (사용자식별정보, 패스워드정보, 사용자 권한정보)
-                // AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(account, accessToken, AuthorityUtils.NO_AUTHORITIES);
-                // AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(account, null, AuthorityUtils.NO_AUTHORITIES);
-                // authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                AbstractAuthenticationToken authenticationToken = createAuthenticationToken(account,  accessToken, request);
-
+                AbstractAuthenticationToken authenticationToken = createAuthenticationToken(userId,  accessToken, request);
                 // SecurityContext 에 AbstractAuthenticationToken 객체를 추가해서 해당 Thread 가 지속적으로 인증 정보를 가질수 있도록 해줌
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
                 securityContext.setAuthentication(authenticationToken);
@@ -62,8 +57,10 @@ public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체
     }
 
     // Request Header 의 Authorization 필드의 Bearer Token 을 가져오는 메서드
-    private String parseBearerToken(HttpServletRequest request) { // http header 의 토큰을 가져오기
-        String bearerToken = request.getHeader("Authorization");
+    // private String parseBearerToken(HttpServletRequest request, String headerName) { // http header 의 토큰을 가져오기
+     private String parseBearerToken(HttpServletRequest request) { // http header 의 토큰을 가져오기
+
+       String bearerToken = request.getHeader("Authorization");
         // hasText : 빈값 || null 인 경우 false 반환
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7); // substring(n) : 인덱스가 n 이후인 값 반환
@@ -74,18 +71,14 @@ public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체
     // 리프레시 토큰 + 만료된 액세스 토큰 -> 액세스 토큰 발급 + 사용자 인증 => 응답헤더에 새로운 액세스 토큰 반환
     private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response, Exception exception) {
         try{
-            String refreshToken = parseBearerToken(request); // 👀
+            String refreshToken = parseBearerToken(request);
             if(refreshToken == null) {
                 throw exception;
             }
             String oldAccessToken = parseBearerToken(request);
             tokenProvider.validateRefreshToken(refreshToken, oldAccessToken);
             String newAccessToken = tokenProvider.recreateAccessToken(oldAccessToken);
-            // String newAccessToken = tokenProvider.recreateAccessToken(oldAccessToken);
             String account = tokenProvider.validate(newAccessToken);
-
-//            AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(account, newAccessToken, AuthorityUtils.NO_AUTHORITIES);
-//            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             AbstractAuthenticationToken authenticationToken = createAuthenticationToken(account, newAccessToken, request);
 
             SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
