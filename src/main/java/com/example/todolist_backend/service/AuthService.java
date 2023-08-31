@@ -9,6 +9,8 @@ import com.example.todolist_backend.dto.user.UserLoginData;
 import com.example.todolist_backend.dto.user.UserLoginResponse;
 import com.example.todolist_backend.repository.RefreshTokenRepository;
 import com.example.todolist_backend.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -60,42 +62,30 @@ public class AuthService {
         return ResponseDto.setSuccess("회원가입 성공", null);
     }
 
-    public ResponseDto<UserLoginResponse> login(UserLoginRequest dto) {
+    public ResponseDto<UserLoginResponse> login(UserLoginRequest dto, HttpServletResponse response) {
         String account = dto.getAccount(); // 🌈 spring validate 설정 추가하기??
         String password = dto.getPassword();
 
         User user = userRepository.findByAccount(account)
-                .filter(it -> passwordEncoder.matches(password, it.getPassword()))
+                .filter(it -> passwordEncoder.matches(password, it.getPassword())) // // passwordEncoder.matches : matches 는 암호화된 문자열을 DB 등에 저장된 값과 비교할 때 사용
                 .orElseThrow(()-> new IllegalArgumentException("아이디 또는 비밀번호 일치하지 않습니다."));
-
-
-
-
-
-        // User user = null;
-//        try {
-//            user = userRepository.findByAccount(account);
-//            // 잘못된 계정
-//            if(user == null) return ResponseDto.setFailed("로그인 실패 _ 잘못된 계정");
-//            // 잘못된 패스워드
-//            if(!passwordEncoder.matches(password, user.getPassword())) // passwordEncoder.matches : matches 는 암호화된 문자열을 DB 등에 저장된 값과 비교할 때 사용
-//                return ResponseDto.setFailed("로그인 실패 _ 잘못된 패스워드");
-//        } catch (Exception error) {
-//            return ResponseDto.setFailed("데이터베이스 에러");
-//        }
 
         String token = tokenProvider.create(user.getId());
         String refreshToken = tokenProvider.createRefreshToken();
         int experTime = 1000 * 60 * 60;
-
 
         // 리프레시 토큰이 있다면 토큰 갱신, 없다면 리프레시토큰 생성 및 저장
         refreshTokenRepository.findById(user.getId())
                 .ifPresentOrElse(it->it.updateRefreshToken(refreshToken), ()->refreshTokenRepository.save(new RefreshToken(user, refreshToken)));
 
         UserLoginData userData = new UserLoginData(user.getId(), user.getAccount(), user.getUserName());
-
         UserLoginResponse userLoginResponseDto = new UserLoginResponse(token, experTime, userData, refreshToken);
+
+        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
+        refreshCookie.setMaxAge(3*60); // 3분
+        refreshCookie.setPath("/"); // 쿠키 경로 설정 (루트 - 전체 앱에서 사용가능)
+        response.addCookie(refreshCookie);
+
         return ResponseDto.setSuccess("로그인 성공했습니다.", userLoginResponseDto);
 
     }
