@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,7 +62,7 @@ public class ToDoService {
     public List<ToDoDTO> list(Long uId) {
             List<ToDo> entityList = toDoRepository.findByUser_Id(uId);
             if(entityList.isEmpty()) {
-                throw new RuntimeException("목록을 가져오는 도중 오류가 발생했습니다.");
+                return Collections.emptyList();
             }
             List<ToDoDTO> todos = new ArrayList<>();
             for(ToDo todo : entityList) {
@@ -92,8 +93,21 @@ public class ToDoService {
         }catch (Exception e) {
             throw new RuntimeException("할일을 업데이트하는 도중 오류가 발생했습니다.");
         }
-
         return ToDoDTO.convertDTO(updateToDo);
-
     }
+
+    // todo 내용 삭제
+    @Transactional
+    public void deleteToDo(Long id) {
+        ToDo todo = toDoRepository.findById(id).orElse(null);
+        if(todo == null) {
+            throw new RuntimeException("삭제하려는 할일을 찾을 수 없습니다.");
+        }
+        try {
+            toDoRepository.delete(todo);
+        } catch (Exception e) {
+            throw new RuntimeException("할일을 삭제하는 도중 오류가 발생했습니다.");
+        }
+    }
+
 }

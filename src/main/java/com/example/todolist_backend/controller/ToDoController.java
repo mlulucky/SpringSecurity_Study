@@ -1,6 +1,5 @@
 package com.example.todolist_backend.controller;
 
-import com.example.todolist_backend.domain.ToDo;
 import com.example.todolist_backend.dto.todo.ToDoCreateRequest;
 import com.example.todolist_backend.dto.todo.ToDoCreateResponse;
 import com.example.todolist_backend.dto.todo.ToDoDTO;
@@ -19,7 +18,8 @@ public class ToDoController {
 
     @GetMapping("/{uId}/list")
     public ResponseEntity<List<ToDoDTO>> list(@PathVariable Long uId) { // 응답데이터 - List<ToDoDTO>
-        return ResponseEntity.ok().body(toDoService.list(uId));
+        List<ToDoDTO> todos = toDoService.list(uId);
+        return ResponseEntity.ok().body(todos);
     }
 
     @PostMapping("/register")
@@ -29,8 +29,15 @@ public class ToDoController {
 
     @PatchMapping("/modify")
     public ResponseEntity<ToDoDTO> modify(@RequestBody ToDoDTO toDoDTO) {
-        return ResponseEntity.ok().body(toDoService.modifyToDo(toDoDTO));
+        return ResponseEntity.ok().body(toDoService.modifyToDo(toDoDTO)); // 응답본문에 포함
     }
+
+    @DeleteMapping("/{todoId}/delete")
+    public ResponseEntity<Void> delete(@PathVariable Long todoId) {
+        toDoService.deleteToDo(todoId);
+        return ResponseEntity.ok().build(); // 상태코드만 반환
+    }
+
 
     // security 인증 - 사용자 확인 테스트
     @GetMapping("/usercheck")
