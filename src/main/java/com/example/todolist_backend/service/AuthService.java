@@ -9,13 +9,12 @@ import com.example.todolist_backend.dto.user.UserLoginData;
 import com.example.todolist_backend.dto.user.UserLoginResponse;
 import com.example.todolist_backend.repository.RefreshTokenRepository;
 import com.example.todolist_backend.repository.UserRepository;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @Transactional
@@ -62,13 +61,14 @@ public class AuthService {
         return ResponseDto.setSuccess("회원가입 성공", null);
     }
 
-    public ResponseDto<UserLoginResponse> login(UserLoginRequest dto, HttpServletResponse response) {
+    public ResponseDto<UserLoginResponse> login(UserLoginRequest dto) {
         String account = dto.getAccount(); // 🌈 spring validate 설정 추가하기??
         String password = dto.getPassword();
 
         User user = userRepository.findByAccount(account)
                 .filter(it -> passwordEncoder.matches(password, it.getPassword())) // // passwordEncoder.matches : matches 는 암호화된 문자열을 DB 등에 저장된 값과 비교할 때 사용
-                .orElseThrow(()-> new IllegalArgumentException("아이디 또는 비밀번호 일치하지 않습니다."));
+                 .orElseThrow(()-> new IllegalArgumentException("아이디 또는 비밀번호 일치하지 않습니다."));
+                // .orElseThrow(()-> new AuthenticationException("아이디 또는 비밀번호 일치하지 않습니다."));
 
         String token = tokenProvider.create(user.getId());
         String refreshToken = tokenProvider.createRefreshToken();
@@ -81,12 +81,39 @@ public class AuthService {
         UserLoginData userData = new UserLoginData(user.getId(), user.getAccount(), user.getUserName());
         UserLoginResponse userLoginResponseDto = new UserLoginResponse(token, experTime, userData, refreshToken);
 
-        Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
-        refreshCookie.setMaxAge(3*60); // 3분
-        refreshCookie.setPath("/"); // 쿠키 경로 설정 (루트 - 전체 앱에서 사용가능)
-        response.addCookie(refreshCookie);
-
         return ResponseDto.setSuccess("로그인 성공했습니다.", userLoginResponseDto);
-
     }
+
+    // 회원정보 조회 & 로그인 인증
+    public ResponseDto<UserLoginData> getUserInfo(String bearerToken) {
+        String accessToken;
+        // accessToken 추출
+        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            accessToken = bearerToken.substring(7); // substring(n) : 인덱스가 n 이후인 값 반환
+        } else {
+            return null;
+        }
+        // 토큰 유효성검증 가져오기
+        String userIdString=tokenProvider.validate(accessToken);
+        Long userId = Long.parseLong(userIdString);
+
+        User user = userRepository.findById(userId).orElse(null);
+        if(user==null) {
+            return ResponseDto.setFailed("해당 유저 정보가 없습니다.");
+        }
+        UserLoginData userData = new UserLoginData(user.getId(), user.getAccount(), user.getUserName());
+        return ResponseDto.setSuccess("유저 정보조회에 성공했습니다.", userData);
+    }
+
+    //    @Transactional
+    //    public Object reissue(TokenRequestDto tokenRequestDto) {
+    //        // 1. Refresh Token 검증
+    //        // 2. Access Token 에서 userId 가져오기
+    //        // 3. 저장소에서 userId 를 기반으로 RefreshToken 가져옴
+    //        // 4. Refresh Token dlfclgksmswl rjatk
+    //        // 5. 새로운 토큰생성
+    //        // 6. 저장소 정보 업데이트
+    //        // 토큰 발급
+    //    }
+
 }
