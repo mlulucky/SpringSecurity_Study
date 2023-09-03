@@ -1,20 +1,16 @@
 package com.example.todolist_backend.config;
 
-import com.example.todolist_backend.domain.User;
 import com.example.todolist_backend.service.TokenProvider;
-import com.example.todolist_backend.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -23,7 +19,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Component
@@ -38,7 +33,7 @@ public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         try{
-            String accessToken = parseBearerToken(request);
+            String accessToken = parseBearerAccessToken(request);
             if(accessToken !=null && !accessToken.equalsIgnoreCase("null")) { // 토큰이 있으면
                 String userId = tokenProvider.validate(accessToken);
                 // SecurityContext 에 추가할 객체 //  사용자 인증 객체를 생성 (사용자식별정보, 패스워드정보, 사용자 권한정보)
@@ -57,9 +52,7 @@ public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체
     }
 
     // Request Header 의 Authorization 필드의 Bearer Token 을 가져오는 메서드
-    // private String parseBearerToken(HttpServletRequest request, String headerName) { // http header 의 토큰을 가져오기
-     private String parseBearerToken(HttpServletRequest request) { // http header 의 토큰을 가져오기
-
+     private String parseBearerAccessToken(HttpServletRequest request) { // http header 의 토큰을 가져오기
        String bearerToken = request.getHeader("Authorization");
         // hasText : 빈값 || null 인 경우 false 반환
         if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
@@ -68,14 +61,24 @@ public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체
         return null;
     }
 
+    private String parseRfreshToken(HttpServletRequest request) {
+       Cookie[] cookies = request.getCookies();
+       for(Cookie cookie : cookies) {
+           if(cookie.getName().equals("refreshToken")) {
+               return cookie.getValue();
+           }
+       }
+       return null;
+    }
+
     // 리프레시 토큰 + 만료된 액세스 토큰 -> 액세스 토큰 발급 + 사용자 인증 => 응답헤더에 새로운 액세스 토큰 반환
     private void reissueAccessToken(HttpServletRequest request, HttpServletResponse response, Exception exception) {
         try{
-            String refreshToken = parseBearerToken(request);
+            String refreshToken = parseRfreshToken(request);
             if(refreshToken == null) {
                 throw exception;
             }
-            String oldAccessToken = parseBearerToken(request);
+            String oldAccessToken = parseBearerAccessToken(request);
             tokenProvider.validateRefreshToken(refreshToken, oldAccessToken);
             String newAccessToken = tokenProvider.recreateAccessToken(oldAccessToken);
             String account = tokenProvider.validate(newAccessToken);
