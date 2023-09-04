@@ -1,6 +1,5 @@
 package com.example.todolist_backend.domain;
 
-import com.example.todolist_backend.dto.user.UserJoinRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -17,7 +16,6 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본키를 자동으로 생성해주는 어노테이션
-//    private int id;
     private Long id;
 
     @Column(nullable = false, unique = true)

@@ -5,9 +5,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-import java.util.UUID;
-
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // 생성자 접근제어 - protected
 @Getter

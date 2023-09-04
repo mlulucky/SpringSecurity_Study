@@ -38,7 +38,6 @@ public class ToDoController {
         return ResponseEntity.ok().build(); // 상태코드만 반환
     }
 
-
     // security 인증 - 사용자 확인 테스트
     @GetMapping("/usercheck")
     public String getToDo(@AuthenticationPrincipal String account) { // jwtFilter 에 SecurityContext 에 인증할 객체로 account 를 담았기때문에, account 정보를 가져와 쓸수있다.

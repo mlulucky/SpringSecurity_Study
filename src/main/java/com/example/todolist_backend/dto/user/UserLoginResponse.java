@@ -1,12 +1,8 @@
 package com.example.todolist_backend.dto.user;
 
-import com.example.todolist_backend.domain.ToDo;
-import com.example.todolist_backend.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor

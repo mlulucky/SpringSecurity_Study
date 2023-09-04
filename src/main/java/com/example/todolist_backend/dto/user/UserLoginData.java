@@ -3,7 +3,6 @@ package com.example.todolist_backend.dto.user;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-
 @AllArgsConstructor
 @Getter
 public class UserLoginData {

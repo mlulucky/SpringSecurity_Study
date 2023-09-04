@@ -1,6 +1,6 @@
 package com.example.todolist_backend.controller;
 
-import com.example.todolist_backend.dto.UserLoginRequest;
+import com.example.todolist_backend.dto.user.UserLoginRequest;
 import com.example.todolist_backend.dto.ResponseDto;
 import com.example.todolist_backend.dto.user.UserJoinRequest;
 import com.example.todolist_backend.dto.user.UserLoginData;
@@ -30,11 +30,6 @@ public class UserController {
         return result;
     }
 
-//    @PostMapping("/reissue") // 토큰 재발급
-//    public ResponseEntity<TokenDto> reissueToken(@RequestBody TokenRequestDto tokenRequestDto) { // 토큰 재발급을 위한 AccessToken / RefreshToken 존재
-//        return ResponseEntity.ok(authService.reissue(tokenRequestDto));
-//    }
-
     // 회원정보 조회 & 로그인 인증 - get 맵핑 - 토큰이용해서 로그인한 사용자만 요청할수있게끔
     @GetMapping("/detail")
     public ResponseDto<UserLoginData> detail(@RequestHeader(value = "Authorization") String token) {
@@ -42,4 +37,10 @@ public class UserController {
         ResponseDto<UserLoginData> result = authService.getUserInfo(token);
         return result;
     }
+
+//    @PostMapping("/reissue") // 토큰 재발급
+//    public ResponseEntity<TokenDto> reissueToken(@RequestBody TokenRequestDto tokenRequestDto) { // 토큰 재발급을 위한 AccessToken / RefreshToken 존재
+//        return ResponseEntity.ok(authService.reissue(tokenRequestDto));
+//    }
+
 }

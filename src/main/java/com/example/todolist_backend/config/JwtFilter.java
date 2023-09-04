@@ -24,23 +24,20 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체크
 
-    // Request 가 들어왔을 때 Request Header 의 Authorization 필드의 Bearer Token 을 가져옴
-    // 가져온 토큰을 검증하고 검증 결과를 SecurityContext 에 추가
     private final TokenProvider tokenProvider;
 
     // 🌈 doFilterInternal - jwt 권한 부여
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         try{
-            String accessToken = parseBearerAccessToken(request);
+            String accessToken = parseBearerAccessToken(request); // Request Header 의 Authorization 필드의 Bearer Token -> Token
             if(accessToken !=null && !accessToken.equalsIgnoreCase("null")) { // 토큰이 있으면
                 String userId = tokenProvider.validate(accessToken);
                 // SecurityContext 에 추가할 객체 //  사용자 인증 객체를 생성 (사용자식별정보, 패스워드정보, 사용자 권한정보)
                 AbstractAuthenticationToken authenticationToken = createAuthenticationToken(userId,  accessToken, request);
                 // SecurityContext 에 AbstractAuthenticationToken 객체를 추가해서 해당 Thread 가 지속적으로 인증 정보를 가질수 있도록 해줌
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-                securityContext.setAuthentication(authenticationToken);
+                securityContext.setAuthentication(authenticationToken); // 가져온 토큰을 검증하고 검증 결과를 SecurityContext 에 추가
                 SecurityContextHolder.setContext(securityContext);
             }
         } catch (ExpiredJwtException e) {
@@ -100,6 +97,5 @@ public class JwtFilter extends OncePerRequestFilter { // 토큰이 있는지 체
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         return authenticationToken;
     }
-
 
 }
