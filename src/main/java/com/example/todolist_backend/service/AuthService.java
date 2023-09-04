@@ -2,7 +2,7 @@ package com.example.todolist_backend.service;
 
 import com.example.todolist_backend.domain.RefreshToken;
 import com.example.todolist_backend.domain.User;
-import com.example.todolist_backend.dto.UserLoginRequest;
+import com.example.todolist_backend.dto.user.UserLoginRequest;
 import com.example.todolist_backend.dto.ResponseDto;
 import com.example.todolist_backend.dto.user.UserJoinRequest;
 import com.example.todolist_backend.dto.user.UserLoginData;
@@ -29,11 +29,19 @@ public class AuthService {
         String account = dto.getAccount();
         String password = dto.getPassword();
         String passwordCheck = dto.getPasswordCheck(); // 비밀번호 체크
+        String email = dto.getEmail();
 
-        // email 중복확인
+        // account 중복확인
         try { // repository 에 접근시에는 try - catch 예외처리하기! (데이터베이스에 접근불가한 경우 있음)
             if(userRepository.existsByAccount(account))
-                return ResponseDto.setFailed("계정이 존재합니다.");
+                return ResponseDto.setFailed("동일한 계정이 존재합니다.");
+        } catch (Exception error) {
+            return ResponseDto.setFailed("데이터베이스 에러");
+        }
+
+        try {
+            if(userRepository.existsByEmail(email))
+                return ResponseDto.setFailed("동일한 이메일이 존재합니다.");
         } catch (Exception error) {
             return ResponseDto.setFailed("데이터베이스 에러");
         }
@@ -66,9 +74,8 @@ public class AuthService {
         String password = dto.getPassword();
 
         User user = userRepository.findByAccount(account)
-                .filter(it -> passwordEncoder.matches(password, it.getPassword())) // // passwordEncoder.matches : matches 는 암호화된 문자열을 DB 등에 저장된 값과 비교할 때 사용
-                 .orElseThrow(()-> new IllegalArgumentException("아이디 또는 비밀번호 일치하지 않습니다."));
-                // .orElseThrow(()-> new AuthenticationException("아이디 또는 비밀번호 일치하지 않습니다."));
+                .filter(it -> passwordEncoder.matches(password, it.getPassword())) // passwordEncoder.matches : matches 는 암호화된 문자열을 DB 등에 저장된 값과 비교할 때 사용
+                  .orElseThrow(()-> new IllegalArgumentException("아이디 또는 비밀번호 일치하지 않습니다."));
 
         String token = tokenProvider.create(user.getId());
         String refreshToken = tokenProvider.createRefreshToken();
