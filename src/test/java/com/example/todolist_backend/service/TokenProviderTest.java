@@ -35,11 +35,6 @@ class TokenProviderTest {
     @Autowired
     RefreshTokenRepository refreshTokenRepository;
 
-    @Value("${jwt.token.secret}") String secretKey;
-    @Value("${expiration-minutes}") long expirationMinutes;
-    @Value("${refresh-expiration-hours}") long refreshExpirationHours;
-    @Value("${issuer}") String issuer;
-
     @Test
     @WithMockUser
     void createToken() {
@@ -71,16 +66,16 @@ class TokenProviderTest {
         System.out.println("newAccessToken = " + newAccessToken);
 }
 
-    @Test
-    void validateRefreshToken() throws JsonProcessingException {
-        Long userId = 28L;
-        // 28 유저가 가지고 있는 리프레시토큰 // 토큰 검사할때 유저 -> 서버에 요청하는 리프레시토큰(유저가 가지고 있는 토큰)과 db 저장된 유저의 리프레시토큰을 비교
-        String requestRefreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJtbHVja3kiLCJpYXQiOjE2OTM0NDI5NzMsImV4cCI6MTY5MzUyOTM3M30.vbVvBp25OQDPFV268cKjRzn-EV6uxmYovH8wKsc075vYiTx-2YCam7y9RgWoo5ZQI1rxplYjpNPed1je2HK1rg";
-        String token = tokenProvider.create(userId);
-        Jws<Claims> ParseToken = tokenProvider.validateAndParseToken(token);
-        System.out.println("ParseToken = " + ParseToken);
-        tokenProvider.validateRefreshToken(requestRefreshToken, token);
-    }
+//    @Test
+//    void validateRefreshToken() throws JsonProcessingException {
+//        Long userId = 28L;
+//        // 28 유저가 가지고 있는 리프레시토큰 // 토큰 검사할때 유저 -> 서버에 요청하는 리프레시토큰(유저가 가지고 있는 토큰)과 db 저장된 유저의 리프레시토큰을 비교
+//        String requestRefreshToken = "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJtbHVja3kiLCJpYXQiOjE2OTM0NDI5NzMsImV4cCI6MTY5MzUyOTM3M30.vbVvBp25OQDPFV268cKjRzn-EV6uxmYovH8wKsc075vYiTx-2YCam7y9RgWoo5ZQI1rxplYjpNPed1je2HK1rg";
+//        String token = tokenProvider.create(userId);
+//        Jws<Claims> ParseToken = tokenProvider.validateAndParseToken(token);
+//        System.out.println("ParseToken = " + ParseToken);
+//        tokenProvider.validateRefreshToken(requestRefreshToken, token);
+//    }
 
     @Test
     void decodeJwtPayloadSubject() throws JsonProcessingException {

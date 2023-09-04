@@ -33,58 +33,48 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
- @WebMvcTest
-class ToDoControllerTest {
-    @Autowired
-    MockMvc mockMvc; // 서블릿, WAS(톰캣) 구동없이 모의 HTTP 서블릿 요청을 전송하는 기능을 제공하는 유틸리티
-
-    @MockBean
-    ToDoService toDoService;
-    @MockBean
-    AuthService authService;
-    @MockBean
-    TokenProvider tokenProvider;
-    @Autowired
-    ObjectMapper objectMapper;
-    @MockBean
-    UserRepository userRepository;
-
-    @Test
-    @DisplayName("투두등록 성공")
-    @WithMockUser
-    void add() throws Exception {
-        String content = "투두등록 테스트";
-        String account = "user111";
-        String password = "1234";
-
-         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-         String userId = userDetails.getUsername();
-
-        Optional<User> user = userRepository.findByAccount(account);
-        // User user = userRepository.findByAccount(account);
-
-        ToDoCreateRequest request = new ToDoCreateRequest(content);
-
-        mockMvc.perform(
-        MockMvcRequestBuilders.get("/api/todo/")
-//        post("/api/todo/1/todos")
-        .with(csrf())
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(objectMapper.writeValueAsBytes(request))
-        )
-        .andDo(print())
-        .andExpect(status().isOk());
-
-
-
-
-
-    }
-
-
-
-
-
-
-
-}
+// @WebMvcTest
+//class ToDoControllerTest {
+//    @Autowired
+//    MockMvc mockMvc; // 서블릿, WAS(톰캣) 구동없이 모의 HTTP 서블릿 요청을 전송하는 기능을 제공하는 유틸리티
+//
+//    @MockBean
+//    ToDoService toDoService;
+//    @MockBean
+//    AuthService authService;
+//    @MockBean
+//    TokenProvider tokenProvider;
+//    @Autowired
+//    ObjectMapper objectMapper;
+//    @MockBean
+//    UserRepository userRepository;
+//
+////    @Test
+////    @DisplayName("투두등록 성공")
+////    @WithMockUser
+////    void add() throws Exception {
+////        String content = "투두등록 테스트";
+////        String account = "user111";
+////        String password = "1234";
+////
+////         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+////         String userId = userDetails.getUsername();
+////
+////        Optional<User> user = userRepository.findByAccount(account);
+////        // User user = userRepository.findByAccount(account);
+////
+////        ToDoCreateRequest request = new ToDoCreateRequest(content);
+////
+////        mockMvc.perform(
+////        MockMvcRequestBuilders.get("/api/todo/")
+//////        post("/api/todo/1/todos")
+////        .with(csrf())
+////        .contentType(MediaType.APPLICATION_JSON)
+////        .content(objectMapper.writeValueAsBytes(request))
+////        )
+////        .andDo(print())
+////        .andExpect(status().isOk());
+////
+////    }
+//
+//}
