@@ -5,16 +5,12 @@ import com.example.todolist_backend.dto.user.UserJoinRequest;
 import com.example.todolist_backend.exception.AppException;
 import com.example.todolist_backend.exception.ErrorCode;
 import com.example.todolist_backend.repository.UserRepository;
-import com.example.todolist_backend.utils.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @Transactional
