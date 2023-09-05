@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  database:
+    container_name: todolist
+    image: mysql/mysql-server:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: todo
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_ROOT_HOST: '%'
+      TZ: 'Asia/Seoul'
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d # sql 초기화 폴더 실행
+    command:
+      - '--character-set-server=utf8mb4'
+      - '--collation-server=utf8mb4_unicode_ci'
+  application:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    depends_on:
+      - database
+    environment: # 스프링 환경변수 설정
+      SPRING_DATASOURCE_URL: jdbc:mysql://database:3307/todo # database 서비스를 참조하도록 수정
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SERVER_PORT: 8080 # server.port를 환경 변수로 설정
+      SPRING_JPA_SHOW_SQL: true
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: true
+      SPRING_DEVTOOLS_RESTART_ENABLED: true
+      SPRING_THYMELEAF_CACHE: false
+      SPRING_DEVTOOLS_RESTART_ADDITIONAL_EXCLUDE: static/**,public/**
+      SPRING_DEVTOOLS_LIVERELOAD_ENABLED: true
+      JWT_TOKEN_SECRET: "secretKey"
+      EXPIRATION_MINUTES: 30
+      REFRESH_EXPIRATION_HOURS: 24
+      ISSUER: mlucky
+      ports: "8080:8080" # Spring Boot 애플리케이션의 포트 설정
+      restart: always
