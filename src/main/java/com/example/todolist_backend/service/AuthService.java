@@ -23,32 +23,22 @@ public class AuthService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
-    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder; // config 로 @Bean 등록
 
-    public ResponseDto<?> join(UserJoinRequest dto) {
+    public Void join(UserJoinRequest dto) {
         String account = dto.getAccount();
-        String password = dto.getPassword();
-        String passwordCheck = dto.getPasswordCheck(); // 비밀번호 체크
+        String password = dto.getPassword(); // 비밀번호 체크는 프론트에서
         String email = dto.getEmail();
-
+        // 🎄 서비스는 에러발생만 -> 에러처리는 컨트롤러에서
         // account 중복확인
-        try { // repository 에 접근시에는 try - catch 예외처리하기! (데이터베이스에 접근불가한 경우 있음)
-            if(userRepository.existsByAccount(account))
-                return ResponseDto.setFailed("동일한 계정이 존재합니다.");
-        } catch (Exception error) {
-            return ResponseDto.setFailed("데이터베이스 에러");
+        if(userRepository.existsByAccount((account))) {
+            throw new UserAlreadyExistException();
+        }
+        // 이메일 중복확인
+        if(userRepository.existsByEmail(email)) {
+            throw new EmailAlreadyExistException();
         }
 
-        try {
-            if(userRepository.existsByEmail(email))
-                return ResponseDto.setFailed("동일한 이메일이 존재합니다.");
-        } catch (Exception error) {
-            return ResponseDto.setFailed("데이터베이스 에러");
-        }
-
-        // 비밀번호가 서로 다르면 failed response 반환
-        if(!password.equals(passwordCheck))
-            return ResponseDto.setFailed("비밀번호가 맞지 않습니다.");
         // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(password);
         // 유저 생성
@@ -59,14 +49,7 @@ public class AuthService {
                  .password(encodedPassword)
                  .build();
 
-        // userRepository 이용해서 데이터베이스에 유저 저장
-        try{
-            userRepository.save(user);
-        } catch (Exception error) {
-            return ResponseDto.setFailed("데이터베이스 에러");
-        }
-        // 성공시 success response 반환
-        return ResponseDto.setSuccess("회원가입 성공", null);
+        userRepository.save(user);
     }
 
     public ResponseDto<UserLoginResponse> login(UserLoginRequest dto) {

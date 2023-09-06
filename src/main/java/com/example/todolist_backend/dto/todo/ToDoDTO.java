@@ -14,7 +14,7 @@ public class ToDoDTO {
     private boolean done;
      private Long userId;
 
-    public static ToDoDTO convertDTO(ToDo todo) {
+    public static ToDoDTO convertToDoDTO(ToDo todo) {
         return new ToDoDTO(
             todo.getId(),
             todo.getContent(),

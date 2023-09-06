@@ -31,4 +31,9 @@ public class ToDo {
     @ManyToOne
     @JoinColumn(name = "user_id") // user_id 라는 이름으로 todo 테이블에 필드 생성
     private User user;
+
+    public void setUpdate(String content, boolean done) {
+        this.content = content;
+        this.done= done;
+    }
 }

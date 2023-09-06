@@ -5,7 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice // 전역 예외처리 클래스로 지정 // 전역적으로 컨트롤러 클래스에서 발생할 수 있는 예외를 처리하고 관리하는 데 사용 // UserController 에서 회원가입 userService.join 호출시 userService 에서 에러처리 RuntimeException 발생시 에러처리됨.
+
+@RestControllerAdvice // 예외 발생 시 json 형태로 결과를 반환  // 전역 예외처리 클래스로 지정 // 전역적으로 컨트롤러 클래스에서 발생할 수 있는 예외를 처리 // @ControllerAdvice 와 @ResponseBody 가 합쳐진 어노테이션 // @ResponseBody 는 컨트롤러의 return 값으로 객체를 넘길 경우 Json 으로 변환해주는 어노테이션
 public class ExceptionManager {
 
     // RuntimeException 예외처리
@@ -21,6 +22,9 @@ public class ExceptionManager {
         return ResponseEntity.status(e.getErrorCode().getHttpStatus())
                 .body(e.getErrorCode().name() + " " + e.getMessage());
     }
+
+
+
 }
 
 
