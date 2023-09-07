@@ -5,8 +5,11 @@ import com.example.todolist_backend.dto.ResponseDto;
 import com.example.todolist_backend.dto.user.UserJoinRequest;
 import com.example.todolist_backend.dto.user.UserLoginData;
 import com.example.todolist_backend.dto.user.UserLoginResponse;
+import com.example.todolist_backend.exception.ErrorResponse;
 import com.example.todolist_backend.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController // JSON 형식의 데이터를 생성하고 응답 헤더를 설정하여 클라이언트에게 전달
@@ -18,9 +21,15 @@ public class UserController {
     // ResponseEntity : HTTP 응답을 표현하기 위한 클래스, 클라이언트에게 응답을 생성하고 반환(응답의 상태 코드, 헤더, 본문 등을 정의할 수 있다)
     // <String>: ResponseEntity 가 응답 본문으로 문자열(String) 데이터를 지정. 응답 본문은 클라이언트에게 전달될 데이터
     @PostMapping("/join")
-    public ResponseDto<?> join(@RequestBody UserJoinRequest joinRequestBody) { // <?> : 타입 와일드카드
-        ResponseDto<?> result = authService.join(joinRequestBody);
-        return result; // 회원가입 응답 dto ==  result(회원가입 성공여부), message, data { null }
+    public ResponseEntity<Object> join(@RequestBody UserJoinRequest joinRequestBody) { // <?> : 타입 와일드카드
+        try {
+            authService.join(joinRequestBody);
+        } catch (UserAlreadyExistException e) {
+            return
+        } catch (EmailAlreadyExistException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse("중복되는 이메일이 존재합니다."));
+        }
+        return ResponseEntity.ok().build(); // 회원가입 성공
     }
 
     // 로그인 응답 dto ==  result(로그인 성공여부), message, data { accessToken, refreshToken, experTime(토큰만료시간), user(유저정보) }
