@@ -7,10 +7,11 @@ import com.example.todolist_backend.dto.ResponseDto;
 import com.example.todolist_backend.dto.user.UserJoinRequest;
 import com.example.todolist_backend.dto.user.UserLoginData;
 import com.example.todolist_backend.dto.user.UserLoginResponse;
+import com.example.todolist_backend.exception.ExceptionMessage;
+import com.example.todolist_backend.exception.UserAlreadyExistException;
 import com.example.todolist_backend.repository.RefreshTokenRepository;
 import com.example.todolist_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,18 +26,20 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder; // config 로 @Bean 등록
 
-    public Void join(UserJoinRequest dto) {
+    public void join(UserJoinRequest dto) {
         String account = dto.getAccount();
         String password = dto.getPassword(); // 비밀번호 체크는 프론트에서
         String email = dto.getEmail();
         // 🎄 서비스는 에러발생만 -> 에러처리는 컨트롤러에서
+
         // account 중복확인
         if(userRepository.existsByAccount((account))) {
-            throw new UserAlreadyExistException();
+//             throw new UserAlreadyExistException();
+              throw new IllegalStateException(ExceptionMessage.ACCOUNT_DUPLICATED);
         }
         // 이메일 중복확인
         if(userRepository.existsByEmail(email)) {
-            throw new EmailAlreadyExistException();
+            throw new IllegalStateException(ExceptionMessage.EMIAL_DUPLICATED);
         }
 
         // 비밀번호 암호화
